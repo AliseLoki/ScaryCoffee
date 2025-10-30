@@ -20,6 +20,7 @@ namespace Assets._ScaryCoffeeProject._CodeBase.Player
             this._minVert = minVert;
             this._maxVert = maxVert;
             this._transform = transform;
+            Cursor.visible = false;
         }
 
         public void RotateCameraUpDown()

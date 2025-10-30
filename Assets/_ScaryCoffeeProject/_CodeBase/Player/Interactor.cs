@@ -63,12 +63,7 @@ namespace Assets._ScaryCoffeeProject._CodeBase.Player
             if (_currentInteractable != null) _currentInteractable.DisableInteraction();
             _currentInteractable = null;
         }
-
-        private void OnDrawGizmos()
-        {
-            Debug.DrawRay(_transform.position, _transform.forward, Color.green);
-        }
-
+    
         private void ReactToInput(InteractableObj interactableObj, HoldableObjectType type)
         {
             switch (interactableObj.InteractableObjType)

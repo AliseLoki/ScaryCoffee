@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Assets._ScaryCoffeeProject._CodeBase.Services.InputSystem;
 using UnityEngine;
 
@@ -17,9 +18,13 @@ namespace Assets._ScaryCoffeeProject._CodeBase.Player
         private HeadCamera _headCamera;
         private Interactor _interactor;
 
+        private float _timer;
+        private float _timeForFall = 1;
+
         public event Action<bool> InteractionEnabled;
         public event Action<bool> PauseEnabled;
         public event Action<bool> ScaryModeEnabled;
+        public event Action CompletelyDied;
 
         private void OnDisable()
         {
@@ -29,8 +34,8 @@ namespace Assets._ScaryCoffeeProject._CodeBase.Player
         public void Init(IInput input)
         {
             _mover = new Mover(input, 6, _controller, this.transform);
-            _rotator = new Rotator(input, 9, this.transform);
-            _headCamera = new HeadCamera(input, 9, -45, 45, _camera.transform);
+            _rotator = new Rotator(input, 6, this.transform);
+            _headCamera = new HeadCamera(input, 6, -45, 45, _camera.transform);
             _interactor = new Interactor(_camera.transform, _layerMask, 1, _hands);
 
             SubscribeToDependencies();
@@ -72,6 +77,25 @@ namespace Assets._ScaryCoffeeProject._CodeBase.Player
         private void OnInteractionEnabled(bool isEnable)
         {
             InteractionEnabled?.Invoke(isEnable);
+        }
+
+        public void Die()
+        {
+            StartCoroutine(FallingRoutine());
+        }
+
+        private IEnumerator FallingRoutine()
+        {
+            Quaternion _targetRotation = Quaternion.Euler(-90, 0, 0);
+
+            while (_timer < _timeForFall)
+            {
+                _timer += Time.deltaTime;
+                transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, 10f * Time.deltaTime);
+                yield return null;
+            }
+
+            CompletelyDied?.Invoke();
         }
     }
 }

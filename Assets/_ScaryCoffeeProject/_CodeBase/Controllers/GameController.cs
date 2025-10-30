@@ -1,7 +1,7 @@
-﻿using System;
-using Assets._ScaryCoffeeProject._CodeBase.Controllers;
+﻿using Assets._ScaryCoffeeProject._CodeBase.Controllers;
 using Assets._ScaryCoffeeProject._CodeBase.InteractableObjects;
 using Assets._ScaryCoffeeProject._CodeBase.LighSystem;
+using Assets._ScaryCoffeeProject._CodeBase.Monster;
 using Assets._ScaryCoffeeProject._CodeBase.Player;
 using Assets._ScaryCoffeeProject._CodeBase.Services.AudioSystem;
 using Assets._ScaryCoffeeProject._CodeBase.Services.InputSystem;
@@ -16,6 +16,8 @@ namespace Assets._ScaryCoffeeProject._CodeBase.GameStateMachine
         [SerializeField] private InteractableObjectsSystem _interactableObjectsSystem;
         [SerializeField] private PlayerCore _player;
         [SerializeField] private UIController _uiController;
+        [SerializeField] private MonsterEnemy _monsterEnemy;
+        [SerializeField] private Trigger _trigger;
 
         [SerializeField] private GameObject _npc;
         [SerializeField] private GameObject _blood;
@@ -28,15 +30,20 @@ namespace Assets._ScaryCoffeeProject._CodeBase.GameStateMachine
             SubscribeToDependencies();
         }
 
-        private void Start()
-        {
-            StartGame();
-        }
-
         private void Update()
         {
+            ReactToESC();
+
             if (_isPaused) return;
             _player.UpdatePlayer();
+        }
+
+        private static void ReactToESC()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
         }
 
         private void OnDisable()
@@ -49,10 +56,21 @@ namespace Assets._ScaryCoffeeProject._CodeBase.GameStateMachine
             _player.InteractionEnabled -= OnInteractionEnabled;
             _player.PauseEnabled -= OnPauseEnabled;
             _player.ScaryModeEnabled -= OnScaryModeEnabled;
+            _player.CompletelyDied -= OnCompletelyDied;
 
             _interactableObjectsSystem.PauseEnabled -= OnPauseEnabled;
 
             _lightController.DarkEnabled -= OnDarkEnabled;
+
+            _trigger.Chasing -= OnChasing;
+
+            _monsterEnemy.Killed -= OnKilled;
+        }
+
+        private void OnKilled()
+        {
+            _isPaused = true;
+            _player.Die();
         }
 
         private void SubscribeToDependencies()
@@ -60,10 +78,26 @@ namespace Assets._ScaryCoffeeProject._CodeBase.GameStateMachine
             _player.InteractionEnabled += OnInteractionEnabled;
             _player.PauseEnabled += OnPauseEnabled;
             _player.ScaryModeEnabled += OnScaryModeEnabled;
+            _player.CompletelyDied += OnCompletelyDied;
 
             _interactableObjectsSystem.PauseEnabled += OnPauseEnabled;
 
             _lightController.DarkEnabled += OnDarkEnabled;
+
+            _trigger.Chasing += OnChasing;
+
+            _monsterEnemy.Killed += OnKilled;
+        }
+
+        private void OnCompletelyDied()
+        {
+            _uiController.ShowDeathScreen();
+        }
+
+        private void OnChasing()
+        {
+            _trigger.gameObject.SetActive(false);
+            _monsterEnemy.Chase();
         }
 
         private void OnDarkEnabled(bool isEnable)
@@ -76,9 +110,6 @@ namespace Assets._ScaryCoffeeProject._CodeBase.GameStateMachine
             {
                 _npc.SetActive(false);
                 _blood.SetActive(true);
-                // убрать нпс
-                // нарисовать след крови
-                // 
             }
         }
 
@@ -101,11 +132,7 @@ namespace Assets._ScaryCoffeeProject._CodeBase.GameStateMachine
         {
             _player.Init(new DesktopInput());
             _interactableObjectsSystem.Init();
-        }
-
-        private void StartGame()
-        {
-
+            _monsterEnemy.Init(_player);
         }
     }
 }
