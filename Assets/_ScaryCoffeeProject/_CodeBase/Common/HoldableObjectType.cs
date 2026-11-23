@@ -5,5 +5,6 @@
         Cup = 0,
         Plate = 1,
         Coffee = 3,
+        Nothing = 4,
     }
 }

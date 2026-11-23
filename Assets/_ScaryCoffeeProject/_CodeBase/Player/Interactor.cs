@@ -82,7 +82,17 @@ namespace Assets._ScaryCoffeeProject._CodeBase.Player
 
                     UseTray(interactableObj);                  
                     break;
+                case InteractableObjectType.Shower:
+
+                    UseShower(interactableObj);                  
+                    break;
+
             }
+        }
+
+        private void UseShower(InteractableObj interactableObj)
+        {
+            interactableObj.Use();
         }
 
         private void UseTray(InteractableObj interactableObj)

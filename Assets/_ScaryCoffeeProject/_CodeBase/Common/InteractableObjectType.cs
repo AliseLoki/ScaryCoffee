@@ -5,5 +5,6 @@
         Conteiner = 0,
         CoffeeMachine = 1,
         Tray = 2,
+        Shower = 3,
     }
 }
